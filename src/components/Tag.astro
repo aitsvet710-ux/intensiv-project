@@ -1,5 +1,6 @@
 ---
 import type { Category, ContentType } from '../lib/types';
+import { CATEGORY_META } from '../lib/categories';
 
 interface Props {
   category: Category | string;
@@ -9,25 +10,29 @@ interface Props {
 
 const { category, contentType, size = 'md' } = Astro.props;
 
-const styles: Record<string, string> = {
-  'Инструмент': 'bg-wood-100 text-wood-800',
-  'Проект/чертёж': 'bg-amber-100 text-amber-900',
-  'Техника и приёмы': 'bg-emerald-100 text-emerald-900',
-  'Безопасность': 'bg-red-100 text-red-900',
-  'События/выставки': 'bg-violet-100 text-violet-900',
-  'Вдохновение': 'bg-sky-100 text-sky-900'
-};
-
-const badge = styles[category] ?? 'bg-wood-100 text-wood-800';
-const typeBadge = 'bg-stone-200 text-stone-700';
+const meta = CATEGORY_META[category as Category];
+const badge = meta?.badge ?? 'bg-graphite-800 text-sand-100';
+const typeBadge = 'bg-sand-100 text-graphite-600';
 ---
 
 <div class="flex flex-wrap items-center gap-2">
-  <span class:list={['inline-flex items-center rounded-full font-medium', size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm', badge]}>
+  <span
+    class:list={[
+      'inline-flex items-center rounded-full font-semibold',
+      size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3 py-1.5 text-sm',
+      badge
+    ]}
+  >
     {category}
   </span>
   {contentType && (
-    <span class:list={['inline-flex items-center rounded-full font-medium', size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm', typeBadge]}>
+    <span
+      class:list={[
+        'inline-flex items-center rounded-full font-medium',
+        size === 'sm' ? 'px-2 py-0.5 text-xs' : 'px-2.5 py-1 text-sm',
+        typeBadge
+      ]}
+    >
       {contentType}
     </span>
   )}

@@ -7,36 +7,57 @@ const links = [
   { href: '/archive/', label: 'Архив' }
 ];
 
-const current = Astro.url.pathname.replace(/^\/intensiv-project/, '') || '/';
+const basePath = withBase('/').replace(/\/$/, '');
+const current = Astro.url.pathname.replace(basePath, '') || '/';
 ---
 
-<header class="sticky top-0 z-40 border-b border-wood-200 bg-cream/95 backdrop-blur">
-  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
-    <a href={withBase('/')} class="group flex items-center gap-2">
-      <span class="flex h-9 w-9 items-center justify-center rounded-md bg-wood-600 font-serif text-lg font-bold text-cream">
+<header class="sticky top-0 z-40 border-b border-sand-200/80 bg-paper/85 backdrop-blur-md">
+  <div class="mx-auto flex max-w-6xl items-center justify-between gap-2 px-4 py-3 sm:gap-4">
+    <a href={withBase('/')} class="group flex items-center gap-2 sm:gap-3">
+      <span
+        class="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-terracotta-500 to-amber-500 font-serif text-lg font-bold text-white shadow-card"
+      >
         Д
       </span>
-      <span class="font-serif text-xl font-bold tracking-tight text-wood-900 group-hover:text-wood-600">
-        {site.title}
+      <span class="flex flex-col leading-tight">
+        <span class="font-serif text-lg font-bold tracking-tight text-graphite-900 group-hover:text-terracotta-600">
+          {site.title}
+        </span>
+        <span class="hidden text-[11px] uppercase tracking-[0.18em] text-graphite-500 sm:block">
+          столярный дайджест
+        </span>
       </span>
     </a>
 
-    <nav class="flex items-center gap-5">
-      {links.map(link => (
-        <a
-          href={withBase(link.href)}
-          class:list={[
-            'text-sm font-medium transition-colors',
-            current === link.href || (link.href !== '/' && current.startsWith(link.href))
-              ? 'text-wood-900 underline decoration-wood-400 underline-offset-4'
-              : 'text-wood-600 hover:text-wood-900'
-          ]}
-        >
-          {link.label}
-        </a>
-      ))}
-      <a href={site.vkUrl} target="_blank" rel="noopener noreferrer" class="btn-vk text-sm">
-        Читать в ВК
+    <nav class="flex items-center gap-0.5 sm:gap-2" aria-label="Основная навигация">
+      {
+        links.map(link => {
+          const active =
+            current === link.href || (link.href !== '/' && current.startsWith(link.href));
+          return (
+            <a
+              href={withBase(link.href)}
+              aria-current={active ? 'page' : undefined}
+              class:list={[
+                'rounded-chip px-2 py-2 text-sm font-medium transition-colors sm:px-3',
+                active
+                  ? 'bg-graphite-900 text-paper'
+                  : 'text-graphite-600 hover:bg-sand-100 hover:text-graphite-900'
+              ]}
+            >
+              {link.label}
+            </a>
+          );
+        })
+      }
+      <a
+        href={site.vkUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="btn-vk ml-1 text-sm"
+      >
+        <span class="sm:hidden">ВК</span>
+        <span class="hidden sm:inline">Читать в ВК</span>
       </a>
     </nav>
   </div>

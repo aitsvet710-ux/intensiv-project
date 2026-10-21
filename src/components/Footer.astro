@@ -1,21 +1,55 @@
 ---
 import site from '../config/site.json';
+import { withBase } from '../lib/utils';
+
+const links = [
+  { href: '/', label: 'Главная' },
+  { href: '/archive/', label: 'Архив' }
+];
 ---
 
-<footer class="mt-16 border-t border-wood-200 bg-wood-50">
-  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
-    <div class="max-w-md">
-      <p class="font-serif text-lg font-bold text-wood-900">{site.title}</p>
-      <p class="mt-2 text-sm leading-relaxed text-wood-600">{site.description}</p>
+<footer class="mt-16 border-t border-sand-200 bg-paper-100">
+  <div class="mx-auto max-w-6xl px-4 py-12">
+    <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+      <div>
+        <a href={withBase('/')} class="flex items-center gap-3">
+          <span
+            class="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-terracotta-500 to-amber-500 font-serif text-base font-bold text-white"
+          >
+            Д
+          </span>
+          <span class="font-serif text-lg font-bold text-graphite-900">{site.title}</span>
+        </a>
+        <p class="mt-4 max-w-sm text-sm leading-relaxed text-graphite-600">{site.description}</p>
+      </div>
+
+      <nav class="flex flex-col gap-3" aria-label="Навигация в подвале">
+        <p class="text-xs font-semibold uppercase tracking-wide text-graphite-500">Разделы</p>
+        {links.map(link => (
+          <a href={withBase(link.href)} class="text-sm font-medium text-graphite-700 hover:text-terracotta-600">
+            {link.label}
+          </a>
+        ))}
+        <a href={site.vkUrl} target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-graphite-700 hover:text-terracotta-600">
+          Сообщество в ВК
+        </a>
+      </nav>
+
+      <div class="flex flex-col items-start gap-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-graphite-500">
+          Подписка на дайджест
+        </p>
+        <p class="max-w-xs text-sm leading-relaxed text-graphite-600">
+          Свежие материалы и разборы — в сообществе мастеров.
+        </p>
+        <a href={site.vkUrl} target="_blank" rel="noopener noreferrer" class="btn-vk">
+          Читать в ВК
+        </a>
+      </div>
     </div>
 
-    <div class="flex flex-col gap-3">
-      <a href={site.vkUrl} target="_blank" rel="noopener noreferrer" class="btn-vk self-start">
-        Сообщество в ВК
-      </a>
-      <p class="text-xs text-wood-500">
-        Материалы ведут на первоисточники. Права на тексты и изображения принадлежат их авторам.
-      </p>
-    </div>
+    <p class="mt-10 border-t border-sand-200 pt-6 text-xs leading-relaxed text-graphite-500">
+      Материалы ведут на первоисточники. Права на тексты и изображения принадлежат их авторам.
+    </p>
   </div>
 </footer>
