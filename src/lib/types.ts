@@ -37,6 +37,10 @@ export interface Material {
   imageUrl?: string;
   tags?: string[];
   collectedAt: string;
+  /** Материал переведён на русский автоматически. */
+  translated?: boolean;
+  /** Язык оригинала, если материал переводили. */
+  sourceLang?: string;
 }
 
 export interface SiteConfig {
@@ -51,5 +55,22 @@ export interface AIConfig {
   model: string;
   maxTokens: number;
   temperature: number;
+  prompt: string;
+  translation: TranslationConfig;
+}
+
+/** Настройки автоматического перевода иноязычных материалов. */
+export interface TranslationConfig {
+  /** Включён ли перевод. Выключается без падения конвейера. */
+  enabled: boolean;
+  /** Модель OpenRouter. Задаётся только здесь, в коде не хардкодится. */
+  model: string;
+  /** Пометка с альтернативными моделями — для владельца проекта. */
+  comment?: string;
+  maxTokens: number;
+  temperature: number;
+  /** Таймаут запроса в миллисекундах. */
+  timeoutMs: number;
+  /** Промпт перевода с плейсхолдером {text}. */
   prompt: string;
 }

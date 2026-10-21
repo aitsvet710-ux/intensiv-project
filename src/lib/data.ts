@@ -3,10 +3,22 @@ import type { Material } from './types';
 
 const materials = materialsData as Material[];
 
+/**
+ * Приводит материал к единому виду: подставляет дефолты для новых полей,
+ * чтобы старые записи в data/materials.json не теряли их.
+ */
+function normalizeMaterial(material: Material): Material {
+  return {
+    ...material,
+    translated: material.translated === true,
+    sourceLang: material.sourceLang
+  };
+}
+
 export function getAllMaterials(): Material[] {
-  return [...materials].sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
+  return materials
+    .map(normalizeMaterial)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
 }
 
 export function getFreshIssue(days = 7, limit = 7): Material[] {

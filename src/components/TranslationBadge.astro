@@ -1,0 +1,73 @@
+---
+import type { Material } from '../lib/types';
+import { detectLanguage } from '../lib/language';
+
+interface Props {
+  material: Material;
+  /**
+   * Показывать ли бейдж «Оригинал», когда перевода нет.
+   * На карточке оставляем, в подвале страницы — по общему правилу.
+   */
+  showOriginal?: boolean;
+}
+
+const { material, showOriginal = true } = Astro.props;
+
+const isTranslated = material.translated === true;
+
+/**
+ * Язык материала проверяем по заголовку и резюме раздельно: у непереведённого
+ * материала резюме может быть русским (эвристический fallback), а заголовок —
+ * иноязычным. Бейдж «Оригинал» ставим, если иноязычным остался хоть один из них.
+ */
+const isForeign =
+  detectLanguage(material.title) === 'other' ||
+  detectLanguage(material.summary ?? '') === 'other';
+---
+
+{
+  isTranslated ? (
+    <span
+      class="inline-flex items-center gap-1 text-[11px] font-medium text-teal-700"
+      title="Текст переведён автоматически"
+      aria-label="Текст переведён автоматически"
+    >
+      <svg
+        class="h-3.5 w-3.5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M3 12h18"></path>
+        <path d="M12 3c2.4 2.6 3.6 5.6 3.6 9S14.4 18.4 12 21c-2.4-2.6-3.6-5.6-3.6-9S9.6 5.6 12 3Z"></path>
+      </svg>
+      Переведено
+    </span>
+  ) : showOriginal && isForeign ? (
+    <span
+      class="inline-flex items-center gap-1 text-[11px] font-medium text-graphite-500"
+      title="Текст на языке источника, автоматический перевод недоступен"
+      aria-label="Текст на языке источника, автоматический перевод недоступен"
+    >
+      <svg
+        class="h-3.5 w-3.5 shrink-0"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"></path>
+        <path d="M14 3v5h5"></path>
+      </svg>
+      Оригинал
+    </span>
+  ) : null
+}

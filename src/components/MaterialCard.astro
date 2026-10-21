@@ -1,5 +1,6 @@
 ---
 import type { Material } from '../lib/types';
+import TranslationBadge from './TranslationBadge.astro';
 import { CATEGORY_META, SOURCE_ICONS, SOURCE_LABELS } from '../lib/categories';
 import { getCoverForMaterial } from '../lib/covers';
 import { formatDate, readingTime, relativeDate } from '../lib/utils';
@@ -94,6 +95,8 @@ const coverAlt = `Иллюстрация рубрики «${material.category}»
       <time datetime={material.publishedAt} title={formatDate(material.publishedAt)}>
         {relativeDate(material.publishedAt)}
       </time>
+
+      <TranslationBadge material={material} />
 
       <span class="ml-auto inline-flex items-center gap-1 rounded-chip bg-sand-100 px-2 py-1 font-medium text-graphite-600">
         <svg
