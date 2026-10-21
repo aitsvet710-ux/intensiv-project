@@ -6,9 +6,9 @@
 ## 1. Технический стек
 
 - **[Astro](https://astro.build/)** — статический сайт (static-first), минимальный JS
-- **[Tailwind CSS](https://tailwindcss.com/)** — стилизация
+- **[Tailwind CSS](https://tailwindcss.com/)** — стилизация (v4, CSS-first: тема в `src/styles/global.css`)
 - **TypeScript** — типизация
-- **Node.js 18+ / 20+** — для сборки и скриптов
+- **Node.js 22+** — для сборки и скриптов (проверено на 24)
 - **GitHub Pages** — хостинг
 
 ## 2. Установка и запуск
@@ -199,6 +199,13 @@ LLM_API_KEY=...
 1. Добавьте значение в union `Category` в `src/lib/types.ts`
 2. Добавьте ключевые слова в `scripts/categorize.ts`
 3. Добавьте метку и цвет в `src/components/Tag.astro`
+
+### Изменить цвета и шрифты
+
+Tailwind v4 настроен через CSS-first `@theme` в `src/styles/global.css`. Файла
+`tailwind.config.mjs` нет: палитра «дерева» (`--color-wood-*`, `--color-cream`) и шрифты
+(`--font-sans`, `--font-serif`) заданы там. Чтобы добавить свой цвет, допишите переменную
+`--color-<имя>-<оттенок>` в блок `@theme`.
 
 ### Заменить источник данных
 

@@ -1,41 +1,61 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap');
+@import 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@theme {
+  --color-wood-50: #f7f3ef;
+  --color-wood-100: #efe6dd;
+  --color-wood-200: #d9c5b3;
+  --color-wood-300: #c4a089;
+  --color-wood-400: #a67c52;
+  --color-wood-500: #8b5a2b;
+  --color-wood-600: #734a24;
+  --color-wood-700: #5c3b1d;
+  --color-wood-800: #452d17;
+  --color-wood-900: #2f1f10;
+
+  --color-ochre-400: #d97706;
+  --color-ochre-500: #b45309;
+
+  --color-cream: #f5f1ea;
+
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-serif: 'Merriweather', Georgia, 'Times New Roman', serif;
+}
 
 @layer base {
   body {
     @apply bg-cream text-wood-900 font-sans antialiased;
   }
-  
-  h1, h2, h3, h4, h5, h6 {
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-serif;
   }
-  
+
   a {
     @apply transition-colors duration-200;
   }
 }
 
-@layer components {
-  .card {
-    @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-wood-200 overflow-hidden;
-  }
-  
-  .tag {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wood-100 text-wood-800;
-  }
-  
-  .btn {
-    @apply inline-flex items-center px-4 py-2 rounded-md font-medium transition-colors duration-200;
-  }
-  
-  .btn-primary {
-    @apply btn bg-wood-600 text-white hover:bg-wood-700;
-  }
-  
-  .btn-vk {
-    @apply btn bg-[#0077FF] text-white hover:bg-[#0055CC];
-  }
+@utility card {
+  @apply bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 border border-wood-200 overflow-hidden;
+}
+
+@utility tag {
+  @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-wood-100 text-wood-800;
+}
+
+@utility btn {
+  @apply inline-flex items-center px-4 py-2 rounded-md font-medium transition-colors duration-200;
+}
+
+@utility btn-primary {
+  @apply btn bg-wood-600 text-white hover:bg-wood-700;
+}
+
+@utility btn-vk {
+  @apply btn bg-[#0077FF] text-white hover:bg-[#0055CC];
 }
