@@ -1,0 +1,42 @@
+{
+  "telegram": [
+    {
+      "name": "@stolyarka_vmeste",
+      "enabled": true,
+      "notes": "Русскоязычное сообщество столяров. Публичная лента t.me/s/<канал>, авторизация не нужна."
+    },
+    {
+      "name": "@kstolyar",
+      "enabled": true,
+      "notes": "Канал по столярному делу. Публичная лента t.me/s/<канал>."
+    }
+  ],
+  "rss": [
+    {
+      "name": "Fine Woodworking",
+      "url": "https://www.finewoodworking.com/rss",
+      "enabled": true,
+      "notes": "Рабочая лента. Материалы на английском — резюме генерируется на русском."
+    },
+    {
+      "name": "Popular Woodworking",
+      "url": "https://www.popularwoodworking.com/rss",
+      "enabled": false,
+      "notes": "Лента доступна. Включить после отладки основного конвейера."
+    },
+    {
+      "name": "Stoljar.ru",
+      "url": "https://www.stoljar.ru/feed/",
+      "enabled": false,
+      "notes": "RSS-лента у портала не обнаружена (404). Оставлено как точка расширения."
+    }
+  ],
+  "youtube": [
+    {
+      "name": "МастерскаяДревень",
+      "url": "",
+      "enabled": false,
+      "notes": "Нужен channel_id из https://www.youtube.com/channel/<id>/. Подставить ID в поле url."
+    }
+  ]
+}
