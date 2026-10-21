@@ -4,14 +4,9 @@ import { detectLanguage } from '../lib/language';
 
 interface Props {
   material: Material;
-  /**
-   * Показывать ли бейдж «Оригинал», когда перевода нет.
-   * На карточке оставляем, в подвале страницы — по общему правилу.
-   */
-  showOriginal?: boolean;
 }
 
-const { material, showOriginal = true } = Astro.props;
+const { material } = Astro.props;
 
 const isTranslated = material.translated === true;
 
@@ -48,7 +43,7 @@ const isForeign =
       </svg>
       Переведено
     </span>
-  ) : showOriginal && isForeign ? (
+  ) : isForeign ? (
     <span
       class="inline-flex items-center gap-1 text-[11px] font-medium text-graphite-500"
       title="Текст на языке источника, автоматический перевод недоступен"
