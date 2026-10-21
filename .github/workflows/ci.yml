@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Code quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Lint Markdown
+        run: npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
+
+      - name: Lint YAML
+        run: find .github -name '*.yml' -print0 | xargs -0 npx --yes yaml-lint
+
+      - name: Check whitespace and conflict markers
+        run: |
+          git diff --check
+          if grep -rInE '^(<{7}|={7}|>{7})' --exclude-dir=.git .; then
+            echo "Merge conflict markers found"
+            exit 1
+          fi
+
+      - name: Validate repo structure
+        run: |
+          for f in README.md LICENSE .gitignore; do
+            [ -f "$f" ] || { echo "missing required file: $f"; exit 1; }
+          done
+          echo "structure ok"
