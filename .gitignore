@@ -39,6 +39,9 @@ build/
 coverage/
 *.tsbuildinfo
 
+# ---------- Astro ----------
+.astro/
+
 # ---------- Python ----------
 __pycache__/
 *.py[cod]

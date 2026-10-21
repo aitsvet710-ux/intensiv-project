@@ -1,78 +1,109 @@
 # Daidgest
 
-[![CI](https://github.com/aitsvet710-ux/intensiv-project/actions/workflows/ci.yml/badge.svg)](https://github.com/aitsvet710-ux/intensiv-project/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Last commit](https://img.shields.io/github/last-commit/aitsvet710-ux/intensiv-project)](https://github.com/aitsvet710-ux/intensiv-project/commits/main)
+**Daidgest** — автоматизированный дайджест по столярному ремеслу, деревообработке и работе с деревом.
+Сайт работает как куратор: собирает свежие материалы из сообществ мастеров, отсеивает рекламу и
+малозначимое, раскладывает по рубрикам и публикует в структурированном виде.
 
-Репозиторий интенсива. Проект — **Daidgest**.
+Аудитория — русскоязычные столяры, redwood-мейкеры, любители и профессионалы, которым нужны
+практические идеи, обзоры инструмента и техники работы. Тон — уважительный к ремеслу, без снобизма,
+с акцентом на «сделай сам» и проверенные методы.
 
-## О проекте
+---
 
-Рабочее пространство сессии: сюда попадает код, который пишется в рамках интенсива,
-и всё, что помогает вести разработку единообразно — CI, шаблоны issues и pull request,
-линтеры и правила оформления коммитов.
+## Быстрый старт
+
+```bash
+npm install        # установка зависимостей
+npm run dev        # режим разработки (http://localhost:4321)
+npm run build      # сборка в dist/
+npm run preview    # предпросмотр собранного сайта
+npm run collect    # сбор материалов из источников
+```
+
+Сайт статический: на выходе — готовые HTML-файлы в `dist/`, которые кладутся на любой хостинг.
+
+## Как это работает
+
+```text
+Источники        →  Сбор        →  Нормализация  →  Фильтрация
+(Telegram, RSS,     scripts/        scripts/          scripts/
+ YouTube)            collect.ts      normalize.ts      filter.ts
+                                                               │
+                        Публикация ←  AI-резюме  ←  Категоризация
+                        data/           scripts/ai/      scripts/
+                        materials.json  summarize.ts     categorize.ts
+```
+
+1. **Сбор.** Адаптеры в `scripts/adapters/` тянут сырые записи из включённых источников.
+   Каждый источник изолирован: сбой одного не ломает остальные.
+2. **Нормализация.** `scripts/normalize.ts` чистит HTML, выравнивает даты, определяет тип контента.
+3. **Фильтрация.** `scripts/filter.ts` отсеивает рекламу и материалы без практической ценности
+   по спискам маркеров (русский и английский).
+4. **Категоризация.** `scripts/categorize.ts` относит материал к рубрике и вытаскивает теги.
+5. **Резюме.** `scripts/ai/summarize.ts` генерирует 1–2 предложения на русском через LLM.
+   Без API-ключа используется эвристический fallback — сбор никогда не падает.
+6. **Публикация.** Результат пишется в `data/materials.json`, откуда его читают страницы.
+
+## Рубрики
+
+| Рубрика | О чём |
+| --- | --- |
+| Инструмент | Обзоры, сравнения, выбор инструмента под задачу |
+| Проект/чертёж | Чертежи, разборы изготовления, расчёты |
+| Техника и приёмы | Рабочие способы, которые экономят время |
+| Безопасность | Охрана труда, пыль, ЛКМ, средства защиты |
+| События/выставки | Встречи, мастер-классы, выставки |
+| Вдохновение | Работы мастеров и идеи для своих проектов |
+
+## Страницы
+
+- **Главная** (`/`) — свежий выпуск: лучшие материалы за последние 7 дней
+- **Архив** (`/archive/`) — все материалы с фильтрами по рубрике, источнику и типу, поиском
+- **Материал** (`/<slug>/`) — карточка с резюме, описанием, тегами и ссылкой на первоисточник
+
+## Настройка
+
+- `src/config/sources.json` — список источников (Telegram, RSS, YouTube)
+- `src/config/site.json` — название, описание, ссылка на сообщество в ВК
+- `src/config/ai.json` — параметры LLM для генерации резюме
+- `.env` — ключи API (никогда не коммитится, шаблон в `.env.example`)
+
+Подробная инструкция по добавлению источников, подключению MCP и деплою — в [AGENTS.md](AGENTS.md).
+
+## Деплой
+
+Публикация на GitHub Pages настроена через `.github/workflows/deploy.yml`:
+после пуша в `main` сайт собирается и выкладывается автоматически.
+
+В `Settings → Pages → Build and deployment` выберите **GitHub Actions**.
 
 ## Структура
 
 ```text
 .
-├── .github/            # CI, шаблоны PR и issues, dependabot
-├── .editorconfig       # Единые правила форматирования
-├── .gitattributes      # Нормализация переводов строк
-├── .gitignore          # Исключения из индекса
-├── .markdownlint.json  # Правила линтера Markdown
-├── .yamllint           # Правила линтера YAML
-├── CONTRIBUTING.md     # Как Contributing
-├── CODEOWNERS          # Владельцы кода
-├── LICENSE             # MIT
-├── README.md
-└── SECURITY.md         # Политика безопасности
+├── .github/workflows/   # ci.yml (линты + сборка), deploy.yml (GitHub Pages)
+├── data/materials.json  # собранные и обработанные материалы
+├── public/              # статичные файлы (favicon)
+├── scripts/             # конвейер сбора
+│   ├── adapters/        # telegram.ts, rss.ts, youtube.ts
+│   ├── ai/summarize.ts  # LLM-резюме + fallback
+│   ├── collect.ts       # точка входа
+│   ├── categorize.ts    # рубрикация и теги
+│   ├── filter.ts        # фильтрация рекламы и шума
+│   └── normalize.ts     # нормализация полей
+├── src/
+│   ├── components/      # карточки, теги, фильтры, шапка, подвал
+│   ├── config/          # sources.json, ai.json, site.json
+│   ├── layouts/         # BaseLayout.astro
+│   ├── lib/             # типы, утилиты, загрузка данных
+│   ├── pages/           # index, archive, [slug]
+│   └── styles/          # global.css
+├── AGENTS.md
+└── astro.config.mjs
 ```
-
-## Быстрый старт
-
-```bash
-git clone https://github.com/aitsvet710-ux/intensiv-project.git
-cd intensiv-project
-git checkout -b feat/my-feature
-```
-
-## Рабочий процесс
-
-1. Ветка от `main` с префиксом `feat/`, `fix/`, `docs/` или `chore/`.
-2. Коммит в стиле Conventional Commits: `feat:`, `fix:`, `docs:`, `chore:`.
-3. Push ветки и Pull Request на GitHub.
-4. Зелёный CI — условие для merge.
-
-Подробности — в [CONTRIBUTING.md](CONTRIBUTING.md).
-
-## CI
-
-Workflow `.github/workflows/ci.yml` запускается на каждый push в `main` и на каждый
-pull request. Проверяет:
-
-- Markdown через `markdownlint-cli2`,
-- YAML через `yaml-lint`,
-- пробельные ошибки и маркеры конфликтов через `git diff --check`,
-- наличие обязательных файлов репозитория.
-
-Локальный запуск тех же проверок:
-
-```bash
-npx --yes markdownlint-cli2 "**/*.md" "#node_modules"
-find .github -name '*.yml' -print0 | xargs -0 npx --yes yaml-lint
-git diff --check
-```
-
-## Безопасность
-
-- 2FA включена на аккаунте владельца.
-- Токены доступа имеют минимальные scope.
-- Ветка `main` защищена: прямые push'и и force-push запрещены.
-- Работает автоматическое сканирование секретов и обновление зависимостей.
-
-Подробности — в [SECURITY.md](SECURITY.md).
 
 ## Лицензия
 
-[MIT](LICENSE)
+MIT — см. [LICENSE](LICENSE).
+
+Материалы дайджеста ведут на первоисточники; права на тексты и изображения принадлежат их авторам.

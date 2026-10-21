@@ -1,0 +1,76 @@
+---
+import type { Material } from '../lib/types';
+import Tag from './Tag.astro';
+import { formatDate } from '../lib/utils';
+
+interface Props {
+  material: Material;
+  compact?: boolean;
+}
+
+const { material, compact = false } = Astro.props;
+
+const sourceLabels: Record<string, string> = {
+  telegram: 'Telegram',
+  rss: 'Блог',
+  youtube: 'YouTube'
+};
+---
+
+<article
+  class="card group flex flex-col"
+  data-category={material.category}
+  data-source={material.source}
+  data-content-type={material.contentType}
+  data-search={`${material.title} ${material.summary ?? ''} ${material.tags?.join(' ') ?? ''}`.toLowerCase()}
+>
+  {material.imageUrl && !compact && (
+    <a href={material.url} target="_blank" rel="noopener noreferrer" class="block overflow-hidden">
+      <img
+        src={material.imageUrl}
+        alt={material.title}
+        loading="lazy"
+        class="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+      />
+    </a>
+  )}
+
+  <div class="flex flex-1 flex-col gap-3 p-5">
+    <div class="flex items-center justify-between gap-3 text-xs text-wood-600">
+      <span class="font-medium uppercase tracking-wide">
+        {sourceLabels[material.sourceType] ?? material.sourceType}
+      </span>
+      <time datetime={material.publishedAt}>{formatDate(material.publishedAt)}</time>
+    </div>
+
+    <h3 class:list={['font-serif font-bold leading-snug text-wood-900', compact ? 'text-base' : 'text-lg']}>
+      <a href={material.url} target="_blank" rel="noopener noreferrer" class="hover:text-wood-600">
+        {material.title}
+      </a>
+    </h3>
+
+    {material.summary && (
+      <p class="flex-1 text-sm leading-relaxed text-wood-700">{material.summary}</p>
+    )}
+
+    {material.tags && material.tags.length > 0 && (
+      <div class="flex flex-wrap gap-1.5">
+        {material.tags.map(tag => (
+          <span class="tag">{tag}</span>
+        ))}
+      </div>
+    )}
+
+    <div class="flex items-center justify-between gap-3 border-t border-wood-100 pt-3">
+      <Tag category={material.category} contentType={material.contentType} size="sm" />
+      <a
+        href={material.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-sm font-medium text-wood-600 hover:text-wood-800"
+      >
+        Читать →
+      </a>
+    </div>
+  </div>
+</article>

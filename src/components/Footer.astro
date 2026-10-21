@@ -1,0 +1,21 @@
+---
+import site from '../config/site.json';
+---
+
+<footer class="mt-16 border-t border-wood-200 bg-wood-50">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-10 sm:flex-row sm:items-start sm:justify-between">
+    <div class="max-w-md">
+      <p class="font-serif text-lg font-bold text-wood-900">{site.title}</p>
+      <p class="mt-2 text-sm leading-relaxed text-wood-600">{site.description}</p>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <a href={site.vkUrl} target="_blank" rel="noopener noreferrer" class="btn-vk self-start">
+        Сообщество в ВК
+      </a>
+      <p class="text-xs text-wood-500">
+        Материалы ведут на первоисточники. Права на тексты и изображения принадлежат их авторам.
+      </p>
+    </div>
+  </div>
+</footer>

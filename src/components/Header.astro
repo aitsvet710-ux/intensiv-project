@@ -1,0 +1,43 @@
+---
+import site from '../config/site.json';
+import { withBase } from '../lib/utils';
+
+const links = [
+  { href: '/', label: 'Главная' },
+  { href: '/archive/', label: 'Архив' }
+];
+
+const current = Astro.url.pathname.replace(/^\/intensiv-project/, '') || '/';
+---
+
+<header class="sticky top-0 z-40 border-b border-wood-200 bg-cream/95 backdrop-blur">
+  <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4">
+    <a href={withBase('/')} class="group flex items-center gap-2">
+      <span class="flex h-9 w-9 items-center justify-center rounded-md bg-wood-600 font-serif text-lg font-bold text-cream">
+        Д
+      </span>
+      <span class="font-serif text-xl font-bold tracking-tight text-wood-900 group-hover:text-wood-600">
+        {site.title}
+      </span>
+    </a>
+
+    <nav class="flex items-center gap-5">
+      {links.map(link => (
+        <a
+          href={withBase(link.href)}
+          class:list={[
+            'text-sm font-medium transition-colors',
+            current === link.href || (link.href !== '/' && current.startsWith(link.href))
+              ? 'text-wood-900 underline decoration-wood-400 underline-offset-4'
+              : 'text-wood-600 hover:text-wood-900'
+          ]}
+        >
+          {link.label}
+        </a>
+      ))}
+      <a href={site.vkUrl} target="_blank" rel="noopener noreferrer" class="btn-vk text-sm">
+        Читать в ВК
+      </a>
+    </nav>
+  </div>
+</header>

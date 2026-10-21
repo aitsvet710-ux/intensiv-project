@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MaterialCard from '../components/MaterialCard.astro';
+import Filters from '../components/Filters.astro';
+import { getAllMaterials, getCategories, getSources, getContentTypes } from '../lib/data';
+
+const materials = getAllMaterials();
+const categories = getCategories();
+const sources = getSources();
+const contentTypes = getContentTypes();
+
+const grouped = materials.reduce<Record<string, typeof materials>>((acc, material) => {
+  const key = new Date(material.publishedAt).toLocaleDateString('ru-RU', {
+    year: 'numeric',
+    month: 'long'
+  });
+  (acc[key] ??= []).push(material);
+  return acc;
+}, {});
+---
+
+<BaseLayout title="Архив">
+  <div class="mx-auto max-w-6xl px-4 py-12">
+    <header class="mb-8">
+      <h1 class="font-serif text-3xl font-bold text-wood-900 sm:text-4xl">Архив материалов</h1>
+      <p class="mt-2 max-w-2xl text-wood-600">
+        Все собранные материалы — {materials.length}. Фильтруйте по рубрике, источнику и типу контента
+        или ищите по названию и краткому содержанию.
+      </p>
+    </header>
+
+    <div class="mb-8">
+      <Filters categories={categories} sources={sources} contentTypes={contentTypes} />
+    </div>
+
+    {materials.length === 0 ? (
+      <div class="card p-10 text-center text-wood-700">
+        Архив пуст. Выполните <code class="rounded bg-wood-100 px-1.5 py-0.5">npm run collect</code>.
+      </div>
+    ) : (
+      <div class="space-y-12">
+        {Object.entries(grouped).map(([period, items]) => (
+          <section>
+            <h2 class="mb-5 font-serif text-xl font-bold text-wood-800">{period}</h2>
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {items.map(material => (
+                <MaterialCard material={material} />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <script is:inline>
+    const params = new URLSearchParams(window.location.search);
+    const categoryParam = params.get('category');
+    if (categoryParam) {
+      const select = document.getElementById('filter-category');
+      if (select) {
+        select.value = categoryParam;
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    }
+  </script>
+</BaseLayout>
