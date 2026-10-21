@@ -3,17 +3,21 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import MaterialCard from '../components/MaterialCard.astro';
 import Filters from '../components/Filters.astro';
 import { getAllMaterials, getCategories, getSources, getContentTypes } from '../lib/data';
+import { plural } from '../lib/utils';
 
 const materials = getAllMaterials();
 const categories = getCategories();
 const sources = getSources();
 const contentTypes = getContentTypes();
 
+/** Лента по месяцам: заголовок формируется через Intl с локалью ru-RU. */
+const monthFormatter = new Intl.DateTimeFormat('ru-RU', {
+  year: 'numeric',
+  month: 'long'
+});
+
 const grouped = materials.reduce<Record<string, typeof materials>>((acc, material) => {
-  const key = new Date(material.publishedAt).toLocaleDateString('ru-RU', {
-    year: 'numeric',
-    month: 'long'
-  });
+  const key = monthFormatter.format(new Date(material.publishedAt));
   (acc[key] ??= []).push(material);
   return acc;
 }, {});
@@ -22,26 +26,35 @@ const grouped = materials.reduce<Record<string, typeof materials>>((acc, materia
 <BaseLayout title="Архив">
   <div class="mx-auto max-w-6xl px-4 py-12">
     <header class="mb-8">
-      <h1 class="font-serif text-3xl font-bold text-wood-900 sm:text-4xl">Архив материалов</h1>
-      <p class="mt-2 max-w-2xl text-wood-600">
-        Все собранные материалы — {materials.length}. Фильтруйте по рубрике, источнику и типу контента
-        или ищите по названию и краткому содержанию.
+      <p class="badge bg-white text-graphite-600 shadow-card">Архив</p>
+      <h1 class="mt-4 font-serif text-3xl font-bold text-graphite-900 sm:text-4xl">
+        Все материалы дайджеста
+      </h1>
+      <p class="mt-3 max-w-2xl leading-relaxed text-graphite-600">
+        Собрано {materials.length} {plural(materials.length, 'материал', 'материала', 'материалов')}.
+        Фильтруйте по рубрике, источнику и типу контента или ищите по названию и краткому содержанию.
       </p>
     </header>
 
-    <div class="mb-8">
+    <div class="mb-10">
       <Filters categories={categories} sources={sources} contentTypes={contentTypes} />
     </div>
 
     {materials.length === 0 ? (
-      <div class="card p-10 text-center text-wood-700">
-        Архив пуст. Выполните <code class="rounded bg-wood-100 px-1.5 py-0.5">npm run collect</code>.
+      <div class="card p-10 text-center text-graphite-600">
+        Архив пуст. Выполните <code class="rounded-chip bg-sand-100 px-1.5 py-0.5">npm run collect</code>.
       </div>
     ) : (
-      <div class="space-y-12">
+      <div class="space-y-14">
         {Object.entries(grouped).map(([period, items]) => (
           <section>
-            <h2 class="mb-5 font-serif text-xl font-bold text-wood-800">{period}</h2>
+            <div class="mb-5 flex items-center gap-4">
+              <h2 class="font-serif text-xl font-bold text-graphite-900">{period}</h2>
+              <span class="h-px flex-1 bg-sand-200" aria-hidden="true"></span>
+              <span class="text-xs text-graphite-500">
+                {items.length} {plural(items.length, 'материал', 'материала', 'материалов')}
+              </span>
+            </div>
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {items.map(material => (
                 <MaterialCard material={material} />
@@ -52,16 +65,4 @@ const grouped = materials.reduce<Record<string, typeof materials>>((acc, materia
       </div>
     )}
   </div>
-
-  <script is:inline>
-    const params = new URLSearchParams(window.location.search);
-    const categoryParam = params.get('category');
-    if (categoryParam) {
-      const select = document.getElementById('filter-category');
-      if (select) {
-        select.value = categoryParam;
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-      }
-    }
-  </script>
 </BaseLayout>

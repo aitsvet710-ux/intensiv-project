@@ -1,76 +1,116 @@
 ---
 import type { Material } from '../lib/types';
-import Tag from './Tag.astro';
-import { formatDate } from '../lib/utils';
+import { CATEGORY_META, SOURCE_ICONS, SOURCE_LABELS } from '../lib/categories';
+import { getCoverForMaterial } from '../lib/covers';
+import { formatDate, readingTime, relativeDate } from '../lib/utils';
 
 interface Props {
   material: Material;
   compact?: boolean;
+  /** Крупная карточка: занимает две колонки на десктопе. */
+  featured?: boolean;
+  /** Обложка выше первого экрана — грузим сразу. */
+  eager?: boolean;
 }
 
-const { material, compact = false } = Astro.props;
+const { material, compact = false, featured = false, eager = false } = Astro.props;
 
-const sourceLabels: Record<string, string> = {
-  telegram: 'Telegram',
-  rss: 'Блог',
-  youtube: 'YouTube'
-};
+const cover = getCoverForMaterial(material);
+const meta = CATEGORY_META[material.category];
+const sourceIcon = SOURCE_ICONS[material.sourceType] ?? SOURCE_ICONS.rss;
+const sourceLabel = SOURCE_LABELS[material.sourceType] ?? material.sourceType;
+const readLabel = readingTime(`${material.summary ?? ''} ${material.description ?? ''}`);
+const coverAlt = `Иллюстрация рубрики «${material.category}»`;
 ---
 
 <article
-  class="card group flex flex-col"
+  class:list={[
+    'card card-lift group',
+    featured ? 'lg:col-span-2' : ''
+  ]}
   data-category={material.category}
   data-source={material.source}
   data-content-type={material.contentType}
   data-search={`${material.title} ${material.summary ?? ''} ${material.tags?.join(' ') ?? ''}`.toLowerCase()}
 >
-  {material.imageUrl && !compact && (
-    <a href={material.url} target="_blank" rel="noopener noreferrer" class="block overflow-hidden">
-      <img
-        src={material.imageUrl}
-        alt={material.title}
-        loading="lazy"
-        class="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-      />
-    </a>
-  )}
+  <div class="relative overflow-hidden bg-sand-200">
+    <img
+      src={cover}
+      alt={coverAlt}
+      width="1600"
+      height="900"
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+      class="aspect-[16/9] w-full object-cover transition-transform duration-200 group-hover:scale-[1.03]"
+    />
+    <span
+      class:list={[
+        'absolute left-3 top-3 inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold shadow-card',
+        meta?.badge ?? 'bg-graphite-800 text-sand-100'
+      ]}
+    >
+      {material.category}
+    </span>
+  </div>
 
   <div class="flex flex-1 flex-col gap-3 p-5">
-    <div class="flex items-center justify-between gap-3 text-xs text-wood-600">
-      <span class="font-medium uppercase tracking-wide">
-        {sourceLabels[material.sourceType] ?? material.sourceType}
-      </span>
-      <time datetime={material.publishedAt}>{formatDate(material.publishedAt)}</time>
-    </div>
-
-    <h3 class:list={['font-serif font-bold leading-snug text-wood-900', compact ? 'text-base' : 'text-lg']}>
-      <a href={material.url} target="_blank" rel="noopener noreferrer" class="hover:text-wood-600">
+    <h3
+      class:list={[
+        'font-serif font-bold leading-snug text-graphite-900',
+        featured ? 'text-xl sm:text-2xl' : compact ? 'text-base' : 'text-lg'
+      ]}
+    >
+      <a
+        href={material.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="line-clamp-2 hover:text-terracotta-600"
+      >
         {material.title}
       </a>
     </h3>
 
     {material.summary && (
-      <p class="flex-1 text-sm leading-relaxed text-wood-700">{material.summary}</p>
+      <p class="line-clamp-2 text-sm leading-relaxed text-graphite-600">{material.summary}</p>
     )}
 
-    {material.tags && material.tags.length > 0 && (
-      <div class="flex flex-wrap gap-1.5">
-        {material.tags.map(tag => (
-          <span class="tag">{tag}</span>
-        ))}
-      </div>
-    )}
+    <div class="mt-auto flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-sand-200 pt-3 text-xs text-graphite-500">
+      <span class="inline-flex items-center gap-1.5 font-medium text-graphite-700">
+        <svg
+          class="h-4 w-4 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <Fragment set:html={sourceIcon} />
+        </svg>
+        {sourceLabel}
+      </span>
 
-    <div class="flex items-center justify-between gap-3 border-t border-wood-100 pt-3">
-      <Tag category={material.category} contentType={material.contentType} size="sm" />
-      <a
-        href={material.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="text-sm font-medium text-wood-600 hover:text-wood-800"
-      >
-        Читать →
-      </a>
+      <time datetime={material.publishedAt} title={formatDate(material.publishedAt)}>
+        {relativeDate(material.publishedAt)}
+      </time>
+
+      <span class="ml-auto inline-flex items-center gap-1 rounded-chip bg-sand-100 px-2 py-1 font-medium text-graphite-600">
+        <svg
+          class="h-3.5 w-3.5 shrink-0"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="8.5"></circle>
+          <path d="M12 7.5V12l3 2"></path>
+        </svg>
+        {readLabel}
+      </span>
     </div>
   </div>
 </article>

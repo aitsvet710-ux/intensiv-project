@@ -8,10 +8,13 @@ import { withBase } from '../lib/utils';
 interface Props {
   title?: string;
   description?: string;
+  /** Обложка для соцсетей. По умолчанию — общая. */
+  image?: string;
 }
 
-const { title, description = site.description } = Astro.props;
+const { title, description = site.description, image = '/images/og-default.webp' } = Astro.props;
 const pageTitle = title ? `${title} — ${site.title}` : `${site.title} — дайджест по столярному ремеслу`;
+const ogImage = image.startsWith('http') ? image : withBase(image);
 ---
 
 <!doctype html>
@@ -24,14 +27,17 @@ const pageTitle = title ? `${title} — ${site.title}` : `${site.title} — да
     <meta property="og:title" content={pageTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:locale" content="ru_RU" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:wght@400;700;900&display=swap"
     />
-    <meta name="theme-color" content="#734a24" />
+    <meta name="theme-color" content="#faf6ee" />
   </head>
   <body class="flex min-h-screen flex-col">
     <Header />

@@ -1,77 +1,136 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import MaterialCard from '../components/MaterialCard.astro';
+import StatsBand from '../components/StatsBand.astro';
+import CategoryGrid from '../components/CategoryGrid.astro';
 import { getFreshIssue, getAllMaterials } from '../lib/data';
-import { withBase } from '../lib/utils';
+import { plural, withBase } from '../lib/utils';
+import site from '../config/site.json';
+import sourcesConfig from '../config/sources.json';
 
 const fresh = getFreshIssue(7, 7);
 const all = getAllMaterials();
 const fallback = fresh.length >= 3 ? fresh : all.slice(0, 7);
-const issueDate = new Date().toLocaleDateString('ru-RU', { year: 'numeric', month: 'long', day: 'numeric' });
+
+const issueDate = new Intl.DateTimeFormat('ru-RU', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric'
+})
+  .format(new Date())
+  .replace(' г.', '');
+
+/** Сколько материалов в каждой рубрике. */
+const counts = all.reduce<Record<string, number>>((acc, material) => {
+  acc[material.category] = (acc[material.category] ?? 0) + 1;
+  return acc;
+}, {});
+
+/** Сколько источников включено в конвейере. */
+const enabledSources = [
+  ...sourcesConfig.telegram,
+  ...sourcesConfig.rss,
+  ...sourcesConfig.youtube
+].filter(source => source.enabled).length;
+
+/** Дата последнего обновления дайджеста. */
+const updatedAt = (() => {
+  const stamps = all
+    .map(material => material.collectedAt || material.publishedAt)
+    .filter(Boolean)
+    .map(value => new Date(value).getTime())
+    .filter(value => !Number.isNaN(value));
+  if (stamps.length === 0) return '—';
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })
+    .format(new Date(Math.max(...stamps)))
+    .replace(' г.', '');
+})();
 ---
 
 <BaseLayout>
-  <section class="border-b border-wood-200 bg-wood-50">
-    <div class="mx-auto max-w-6xl px-4 py-14 sm:py-20">
-      <p class="mb-3 inline-flex items-center gap-2 rounded-full bg-wood-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-wood-700">
-        Свежий выпуск · {issueDate}
-      </p>
-      <h1 class="max-w-3xl font-serif text-3xl font-bold leading-tight text-wood-900 sm:text-5xl">
-        Практичные находки для тех, кто работает с деревом
-      </h1>
-      <p class="mt-4 max-w-2xl text-base leading-relaxed text-wood-700 sm:text-lg">
-        Дайджест собирает свежие материалы из сообществ мастеров, отбирает то, что действительно
-        пригодится в работе, и раскладывает по рубрикам: инструмент, чертежи, техника, безопасность.
-      </p>
-      <div class="mt-7 flex flex-wrap gap-3">
-        <a href={withBase('/archive/')} class="btn-primary">Все материалы</a>
-        <a href="#fresh" class="btn border border-wood-300 text-wood-800 hover:bg-wood-100">Свежее за 7 дней</a>
+  <section class="relative overflow-hidden border-b border-sand-200 bg-gradient-to-b from-paper-100 via-paper to-paper">
+    <div
+      class="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-terracotta-200/50 blur-3xl"
+      aria-hidden="true"
+    >
+    </div>
+
+    <div class="relative mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:py-20 lg:grid-cols-[1.15fr_0.85fr]">
+      <div>
+        <p class="badge bg-white text-terracotta-600 shadow-card">
+          <span class="h-1.5 w-1.5 rounded-full bg-terracotta-500" aria-hidden="true"></span>
+          Свежий выпуск · {issueDate}
+        </p>
+
+        <h1 class="mt-5 font-serif text-5xl font-black leading-[1.02] tracking-tight text-graphite-900 sm:text-6xl lg:text-7xl">
+          {site.title}
+        </h1>
+
+        <p class="mt-4 max-w-xl text-base leading-relaxed text-graphite-600 sm:text-lg">
+          Дайджест по столярному ремеслу: инструмент, чертежи, техника и безопасность — только то,
+          что пригодится в работе.
+        </p>
+
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href={withBase('/archive/')} class="btn-primary">Смотреть архив</a>
+          <a href="#fresh" class="btn-ghost">Свежее за 7 дней</a>
+        </div>
       </div>
+
+      <StatsBand materials={all.length} sources={enabledSources} updatedAt={updatedAt} />
     </div>
   </section>
 
-  <section id="fresh" class="mx-auto max-w-6xl px-4 py-14">
-    <div class="mb-8 flex flex-wrap items-baseline justify-between gap-3">
-      <h2 class="font-serif text-2xl font-bold text-wood-900">Свежий выпуск</h2>
-      <p class="text-sm text-wood-600">
-        {fallback.length} {fallback.length === 1 ? 'материал' : 'материалов'} из {all.length} в архиве
-      </p>
+  <section class="mx-auto max-w-6xl px-4 py-14">
+    <div class="mb-7 flex flex-wrap items-baseline justify-between gap-3">
+      <h2 class="font-serif text-2xl font-bold text-graphite-900">Рубрики</h2>
+      <p class="text-sm text-graphite-500">Выберите рубрику — архив отфильтруется сам</p>
     </div>
 
-    {fallback.length > 0 ? (
-      <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {fallback.map(material => (
-          <MaterialCard material={material} />
-        ))}
-      </div>
-    ) : (
-      <div class="card p-10 text-center">
-        <p class="text-wood-700">
-          Пока нет собранных материалов. Выполните <code class="rounded bg-wood-100 px-1.5 py-0.5 text-sm">npm run collect</code>,
-          чтобы наполнить выпуск.
+    <CategoryGrid counts={counts} />
+  </section>
+
+  <section id="fresh" class="border-t border-sand-200 bg-paper-100">
+    <div class="mx-auto max-w-6xl px-4 py-14">
+      <div class="mb-8 flex flex-wrap items-baseline justify-between gap-3">
+        <h2 class="font-serif text-2xl font-bold text-graphite-900">Свежий выпуск</h2>
+        <p class="text-sm text-graphite-600">
+          {fallback.length} {plural(fallback.length, 'материал', 'материала', 'материалов')} из {all.length} в архиве
         </p>
       </div>
-    )}
+
+      {fallback.length > 0 ? (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {fallback.map((material, index) => (
+            <MaterialCard material={material} featured={index === 0} eager={index === 0} />
+          ))}
+        </div>
+      ) : (
+        <div class="card p-10 text-center text-graphite-600">
+          Пока нет собранных материалов. Выполните <code class="rounded-chip bg-sand-100 px-1.5 py-0.5 text-sm">npm run collect</code>,
+          чтобы наполнить выпуск.
+        </div>
+      )}
+    </div>
   </section>
 
-  <section class="border-t border-wood-200 bg-wood-50">
-    <div class="mx-auto max-w-6xl px-4 py-14">
-      <h2 class="mb-6 font-serif text-2xl font-bold text-wood-900">Рубрики</h2>
-      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {[
-          ['Инструмент', 'Обзоры, сравнения, выбор под задачу'],
-          ['Проект/чертёж', 'Готовые чертежи и разборы изготовления'],
-          ['Техника и приёмы', 'Рабочие способы, которые экономят время'],
-          ['Безопасность', 'Охрана труда, пыль, ЛКМ, защита'],
-          ['События/выставки', 'Встречи, мастер-классы, выставки'],
-          ['Вдохновение', 'Работы мастеров и идеи для своих проектов']
-        ].map(([title, text]) => (
-          <a href={withBase(`/archive/?category=${encodeURIComponent(title!)}`)} class="card p-5 transition-colors hover:bg-wood-100">
-            <h3 class="font-serif text-lg font-bold text-wood-900">{title}</h3>
-            <p class="mt-1.5 text-sm text-wood-600">{text}</p>
-          </a>
-        ))}
+  <section class="border-t border-sand-200">
+    <div
+      class="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-12 sm:flex-row sm:items-center"
+    >
+      <div>
+        <h2 class="font-serif text-2xl font-bold text-graphite-900">
+          Весь архив — {all.length} {plural(all.length, 'материал', 'материала', 'материалов')}
+        </h2>
+        <p class="mt-2 text-graphite-600">
+          Фильтруйте по рубрике, источнику и типу контента или ищите по названию и содержанию.
+        </p>
       </div>
+      <a href={withBase('/archive/')} class="btn-primary">Смотреть весь архив</a>
     </div>
   </section>
 </BaseLayout>
