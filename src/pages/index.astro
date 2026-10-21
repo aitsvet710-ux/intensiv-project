@@ -5,7 +5,7 @@ import StatsBand from '../components/StatsBand.astro';
 import CategoryGrid from '../components/CategoryGrid.astro';
 import { getFreshIssue, getAllMaterials } from '../lib/data';
 import { plural, withBase } from '../lib/utils';
-import site from '../config/site.json';
+import { getSiteName, getTagline } from '../lib/site';
 import sourcesConfig from '../config/sources.json';
 
 const fresh = getFreshIssue(7, 7);
@@ -67,12 +67,11 @@ const updatedAt = (() => {
         </p>
 
         <h1 class="mt-5 font-serif text-5xl font-black leading-[1.02] tracking-tight text-graphite-900 sm:text-6xl lg:text-7xl">
-          {site.title}
+          {getSiteName()}
         </h1>
 
         <p class="mt-4 max-w-xl text-base leading-relaxed text-graphite-600 sm:text-lg">
-          Дайджест по столярному ремеслу: инструмент, чертежи, техника и безопасность — только то,
-          что пригодится в работе.
+          {getTagline()}
         </p>
 
         <div class="mt-8 flex flex-wrap gap-3">
