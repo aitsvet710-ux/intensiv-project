@@ -9,6 +9,10 @@ export interface RawMaterial {
   description?: string;
   imageUrl?: string;
   contentType?: ContentType;
+  /** Материал переведён на русский автоматически. */
+  translated?: boolean;
+  /** Язык оригинала, если материал переводили. */
+  sourceLang?: string;
 }
 
 /**

@@ -7,6 +7,7 @@ import { categorize, extractTags } from './categorize';
 import { isValuable } from './filter';
 import { normalize, type RawMaterial } from './normalize';
 import { loadEnvFile, summarize } from './ai/summarize';
+import { sourceLanguageOf, translateToRussian } from './ai/translate';
 import { collectRss } from './adapters/rss';
 import { collectTelegramPublic, collectTelegramViaApi } from './adapters/telegram';
 import { collectYoutube } from './adapters/youtube';
@@ -166,6 +167,34 @@ function loadExisting(): Material[] {
   }
 }
 
+/**
+ * Переводит иноязычный материал на русский: заголовок и описание.
+ *
+ * Перевод идёт до фильтра — так фильтр получает шанс отсеять мусор
+ * по русским маркерам уже переведённого текста. Если ключа нет или
+ * перевод не удался — материал остаётся на языке источника.
+ */
+async function translateMaterial(
+  material: RawMaterial,
+  config: AIConfig
+): Promise<RawMaterial> {
+  const sourceLang = sourceLanguageOf(`${material.title} ${material.description ?? ''}`);
+  if (sourceLang === 'ru') return { ...material, translated: false };
+
+  const title = await translateToRussian(material.title, sourceLang, config);
+  const description = material.description
+    ? await translateToRussian(material.description, sourceLang, config)
+    : undefined;
+
+  return {
+    ...material,
+    title: title.text,
+    description: description?.text ?? material.description,
+    translated: title.translated || description?.translated === true,
+    sourceLang
+  };
+}
+
 async function main(): Promise<void> {
   loadEnvFile(resolve(ROOT, '.env'));
 
@@ -191,7 +220,14 @@ async function main(): Promise<void> {
   raw = dedupe(raw);
 
   const normalized = raw.map(normalize);
-  const passed = normalized.filter(material => {
+
+  // Переводим иноязычные материалы до фильтра — фильтр смотрит на русский текст.
+  const localized: RawMaterial[] = [];
+  for (const material of normalized) {
+    localized.push(await translateMaterial(material, aiConfig));
+  }
+
+  const passed = localized.filter(material => {
     const verdict = isValuable(material);
     if (!verdict.passed) {
       console.log(`  ✗ отсеян: ${material.title.slice(0, 60)} — ${verdict.reason}`);
@@ -214,6 +250,7 @@ async function main(): Promise<void> {
   for (const material of toProcess) {
     console.log(`  • ${material.title.slice(0, 70)}`);
     const summary = await summarize(material, aiConfig);
+    const summaryTranslation = await translateToRussian(summary, material.sourceLang, aiConfig);
     processed.push({
       id: makeId(material),
       title: material.title,
@@ -222,12 +259,14 @@ async function main(): Promise<void> {
       sourceType: material.sourceType,
       publishedAt: material.publishedAt,
       description: material.description,
-      summary,
+      summary: summaryTranslation.text,
       category: categorize(material),
       contentType: material.contentType ?? 'статья',
       imageUrl: material.imageUrl,
       tags: extractTags(material),
-      collectedAt: new Date().toISOString()
+      collectedAt: new Date().toISOString(),
+      translated: material.translated === true || summaryTranslation.translated,
+      sourceLang: material.sourceLang
     });
   }
 
