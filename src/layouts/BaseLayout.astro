@@ -25,6 +25,12 @@ const pageTitle = title ? `${title} — ${site.title}` : `${site.title} — да
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <link rel="icon" type="image/svg+xml" href={withBase('/favicon.svg')} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap"
+    />
     <meta name="theme-color" content="#734a24" />
   </head>
   <body class="flex min-h-screen flex-col">
