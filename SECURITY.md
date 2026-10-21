@@ -9,7 +9,7 @@
 ## Reporting a vulnerability
 
 Не публикуйте уязвимости в открытых issues. Сообщите приватно через
-GitHub Security Advisories: https://github.com/aitsvet710-ux/intensiv-project/security/advisories/new
+[GitHub Security Advisories](https://github.com/aitsvet710-ux/intensiv-project/security/advisories/new).
 
 Опишите:
 
